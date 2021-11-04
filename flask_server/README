@@ -1,3 +1,0 @@
-Run these in order:
-1. bridge.py   - allows results from EC2 to be stored in a database
-2. run.py      - starts a rest API endpoint that can be requested
