@@ -21,3 +21,7 @@ class Camera:
             requests.post(HOST_ADDRESS, files={'file': open("latest.jpg", "rb")})
             print("Picture sent\n")
             time.sleep(DELAY)
+
+if __name__ == "__main__":
+    c = Camera()
+    c.start()
