@@ -12,14 +12,15 @@ export default function App() {
 
   const DELAY = 15000;
 
-  const cameraStatus = async () => {
-    const cameraPermission = await Camera.requestPermissionsAsync();
-
-    setHasCameraPermission(cameraPermission.status === 'granted');
-  }
+  useEffect(() => {
+    (async () => {
+      const cameraStatus = await Camera.requestCameraPermissionsAsync();
+      setHasCameraPermission(cameraStatus.status === 'granted');
+    })();
+  }, []);
 
   const takePicture = async () => {
-    console.log("Taking picture");
+    console.log("Take pictures");
     if (camera){
       const data = await camera.takePictureAsync(null);
       console.log(data.uri);
