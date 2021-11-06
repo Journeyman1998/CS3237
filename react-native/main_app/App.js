@@ -156,6 +156,10 @@ export default function App() {
       setRawHumidity(results.humidity);
       setHumidity();
 
+      //set thresholds
+      setLowThreshold(results.config["low_threshold"])
+      setHighThreshold(results.config["high_threshold"])
+
       setCurrentScreen("status");
       logStates("Initialisation");
     })
@@ -164,6 +168,7 @@ export default function App() {
     getLatestImage(setImage);
 
   }, [])
+
 
   const logStates = (location) => {
     console.log("Logging from " + location);
