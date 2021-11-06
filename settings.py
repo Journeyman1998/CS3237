@@ -1,6 +1,3 @@
-from flask.gesture_broker import HOST_ADDRESS
-
-
 USERNAME = "aegis"
 PASSWORD = "aegis2021"
 MQTT_GESTURE_RESULTS = "aegis/gesture_results"
