@@ -78,6 +78,7 @@ async def run(address):
 
         while True:
             data = await humidity_sensor.read(client)
+            print(data)
             send_data(mqtt_server, data, TOPIC)
             await asyncio.sleep(5)
 

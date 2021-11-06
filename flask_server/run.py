@@ -26,7 +26,7 @@ def read_config():
 
 def save_config(config):
     with open(CONFIG_DIR, "w") as f:
-        data = json.dump(config, f)
+        json.dump(config, f)
 
 
 class Gesture(Resource):
@@ -44,7 +44,6 @@ class Gesture(Resource):
         config = read_config()
 
         results = {"id": row[0], "gesture": row[1], "humidity": humidity, "config": config}
-        print("Sent: " + results)
         return results
 
 
@@ -72,7 +71,6 @@ class UpdateHumidity(Resource):
         config = read_config()
         config["low_threshold"] = low_humidity
         config["high_threshold"] = high_humidity
-
         save_config(config)
 
 

@@ -70,7 +70,7 @@ export default function App() {
       setHighThreshold(parseInt(high, 10));
     }
     
-    sendHumidityToServer().then((res) => console.log(res));
+    sendHumidityToServer();
   }
 
 
@@ -89,29 +89,6 @@ export default function App() {
 
     return "Success";
   }
-
-  // initialise the state
-  useEffect(() => {
-
-    getAppStatus().then((results) => {
-
-      //set gesture
-      setGestureId(results.id);
-      setLastGestureId(results.id);
-      setGesture(results.gesture);
-
-      //set humidity
-      setRawHumidity(results.humidity);
-      setHumidity();
-
-      setCurrentScreen("status");
-      logStates("Initialisation");
-    })
-
-    //set image
-    getLatestImage(setImage);
-
-  }, [])
 
   // only change back from water plant screen when humidity is normal
   useEffect(() => {
@@ -165,6 +142,28 @@ export default function App() {
         }
   }, [lastGestureId, gestureId, currentScreen, gesture])
 
+  // initialise the state
+  useEffect(() => {
+
+    getAppStatus().then((results) => {
+
+      //set gesture
+      setGestureId(results.id);
+      setLastGestureId(results.id);
+      setGesture(results.gesture);
+
+      //set humidity
+      setRawHumidity(results.humidity);
+      setHumidity();
+
+      setCurrentScreen("status");
+      logStates("Initialisation");
+    })
+
+    //set image
+    getLatestImage(setImage);
+
+  }, [])
 
   const logStates = (location) => {
     console.log("Logging from " + location);
@@ -211,8 +210,8 @@ function CameraScreen({image}) {
 
 function StatusScreen({humidityLevel, lowHumidityThreshold, highHumidityThreshold, setHumidityThresholds}) {
   
-  const [lowText, setLow] = useState(lowHumidityThreshold);
-  const [highText, setHigh] = useState(highHumidityThreshold);
+  const [lowText, setLow] = useState(lowHumidityThreshold.toString());
+  const [highText, setHigh] = useState(highHumidityThreshold.toString());
 
   const HumidityReadingLabel = () => {
     if (humidityLevel === "Low"){
@@ -233,18 +232,21 @@ function StatusScreen({humidityLevel, lowHumidityThreshold, highHumidityThreshol
       <HumidityReadingLabel />
       <Text></Text>
       <Text></Text>
+      <Text> Warning: </Text>
       <TextInput
         style={styles.input}
         onChangeText={setLow}
         value={lowText}
-        placeholder="Set a threshold for humidity warning"
+        placeholder="Set threshold for humidity warning"
         keyboardType="numeric"
       />
+
+      <Text> Accepted: </Text>
       <TextInput
         style={styles.input}
         onChangeText={setHigh}
         value={highText}
-        placeholder="Set a threshold for accepted humidity"
+        placeholder="Set threshold for accepted humidity"
         keyboardType="numeric"
       />
       <Button onPress={() => setHumidityThresholds(lowText, highText)} title="Set Thresholds" />
