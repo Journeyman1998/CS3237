@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Cam",
+    "name": "Camera App",
     "description": "Takes picture regularly for AEGIS",
-    "slug": "ImageShare",
+    "slug": "Camera",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -21,7 +21,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.tng.cam",
+      "package": "com.tng.camera",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
