@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image, SafeAreaView, Button, TextInput } from 'react-native';
 
 const getAppStatus = async () => {
   let response = await fetch(
@@ -29,6 +29,9 @@ export default function App() {
   const [gestureId, setGestureId] = useState(0); //gesture id
   const [lastGestureId, setLastGestureId] = useState(0) // stores the last gesture id
 
+  const [lowThreshold, setLowThreshold] = useState(30);
+  const [highThreshold, setHighThreshold] = useState(60);
+
   const [currentScreen, setCurrentScreen] = useState("status") // current state of app
 
   const [rawHumidity, setRawHumidity] = useState(0);
@@ -49,12 +52,22 @@ export default function App() {
   }
 
   const setHumidity = () => {
-    if (rawHumidity < 30) {
+    if (rawHumidity < lowThreshold) {
       setHumidityLevel("Low");
-    } else if (rawHumidity < 60) {
+    } else if (rawHumidity < highThreshold) {
       setHumidityLevel("Med");
     } else {
       setHumidityLevel("High");
+    }
+  }
+
+  const setThresholds = (low, high) => {
+    if(low !==  "") {
+      setLowThreshold(parseInt(low, 10))
+    }
+
+    if(high !== "") {
+      setHighThreshold(parseInt(high, 10));
     }
   }
 
@@ -72,6 +85,7 @@ export default function App() {
       setRawHumidity(results.humidity);
       setHumidity();
 
+      setCurrentScreen("status");
       logStates("Initialisation");
     })
 
@@ -86,6 +100,11 @@ export default function App() {
       setCurrentScreen("status");
     }
   }, [humidityLevel, currentScreen])
+
+
+  useEffect(() => {
+    setHumidity();
+  }, [lowThreshold, highThreshold])
 
 
   // normally on status screen, just keeping polling for new gestures
@@ -139,7 +158,7 @@ export default function App() {
 
 
   if(currentScreen === "status") {
-    return <StatusScreen humidityLevel={humidityLevel} />
+    return <StatusScreen humidityLevel={humidityLevel} lowHumidityThreshold={lowThreshold} highHumidityThreshold={highThreshold} setHumidityThresholds={setThresholds} />
   }
   else if(currentScreen === "camera") {
     return <CameraScreen image={image}/>
@@ -171,7 +190,10 @@ function CameraScreen({image}) {
   );
 }
 
-function StatusScreen({humidityLevel}) {
+function StatusScreen({humidityLevel, lowHumidityThreshold, highHumidityThreshold, setHumidityThresholds}) {
+  
+  const [lowText, setLow] = useState(lowHumidityThreshold);
+  const [highText, setHigh] = useState(highHumidityThreshold);
 
   const HumidityReadingLabel = () => {
     if (humidityLevel === "Low"){
@@ -183,12 +205,33 @@ function StatusScreen({humidityLevel}) {
     }
   }
 
+
   return (
     <View style={styles.container}>
+      <SafeAreaView>
       <Text>Status Screen</Text>
       <Text>Humidity: </Text>
       <HumidityReadingLabel />
+      <Text></Text>
+      <Text></Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={setLow}
+        value={lowText}
+        placeholder="Set a threshold for humidity warning"
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        onChangeText={setHigh}
+        value={highText}
+        placeholder="Set a threshold for accepted humidity"
+        keyboardType="numeric"
+      />
+      <Button onPress={() => setHumidityThresholds(lowText, highText)} title="Set Thresholds" />
+
       <StatusBar style="auto" />
+    </SafeAreaView>
     </View>
   );
 }
@@ -208,5 +251,11 @@ const styles = StyleSheet.create({
   },
   humidityHigh: {
     backgroundColor: 'green',
-  }
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+  },
 });

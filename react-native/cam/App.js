@@ -21,7 +21,8 @@ export default function App() {
 
   const takePicture = async () => {
     if (camera){
-      const data = await camera.takePictureAsync(null)
+      const data = await camera.takePictureAsync(null);
+      console.log(data.uri);
       setImage(data.uri);
       return data.uri;
     }
