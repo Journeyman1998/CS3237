@@ -69,6 +69,25 @@ export default function App() {
     if(high !== "") {
       setHighThreshold(parseInt(high, 10));
     }
+    
+    sendHumidityToServer().then((res) => console.log(res));
+  }
+
+
+  const sendHumidityToServer = async () => {
+
+    var body = new FormData();
+    body.append('low_humidity', lowThreshold);
+    body.append('high_humidity', highThreshold);
+
+    fetch('http://18.142.17.12:5000/config',
+      {
+        method: 'POST',
+        body
+      }
+    );
+
+    return "Success";
   }
 
   // initialise the state

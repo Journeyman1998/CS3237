@@ -1,25 +1,23 @@
 import paho.mqtt.client as mqtt
 import numpy as np
 import json
+from settings import USERNAME, PASSWORD, MQTT_PORT, MQTT_GESTURE_RESULTS, MQTT_GESTURE_CLASSIFIER, MODEL_DIR
 import tensorflow as tf
 from keras.models import load_model
 from tensorflow.python.keras.backend import set_session
 
 
-USERNAME = "aegis"
-PASSWORD = "aegis2021"
 gesturetype = ["Water plant", "Swipe"]
 
-MODEL_NAME = '/home/ubuntu/model'
 session = tf.compat.v1.Session(graph=tf.compat.v1.Graph())
 
 with session.graph.as_default():
     set_session(session)
-    model = load_model(MODEL_NAME)
+    model = load_model(MODEL_DIR)
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code: " + str(rc))
-    client.subscribe("aegis/gesture")
+    client.subscribe(MQTT_GESTURE_CLASSIFIER)
     print("Listening")
 
 def classify_gesture(data):
@@ -41,11 +39,11 @@ def on_message(client, userdata, message):
     result = classify_gesture(data)
     print(f"Gesture detected: {result}")
 
-    client.publish("aegis/gesture_results", result)
+    client.publish(MQTT_GESTURE_RESULTS, result)
 
 client = mqtt.Client()
 client.username_pw_set(USERNAME, PASSWORD)
 client.on_connect = on_connect
 client.on_message = on_message
-client.connect("localhost", 1883, 60)
+client.connect("localhost", MQTT_PORT, 60)
 client.loop_forever()

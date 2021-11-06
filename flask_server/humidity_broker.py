@@ -1,21 +1,17 @@
 import paho.mqtt.client as mqtt
 import sqlite3
-
-USERNAME = "aegis"
-PASSWORD = "aegis2021"
-RESULTS = "aegis/gesture_results"
-HOST_ADDRESS = "localhost"
+from settings import USERNAME, PASSWORD, MQTT_HUMIDITY
 
 conn = sqlite3.connect('./iot.db', check_same_thread=False)
 
-add_gesture_to_db_sql = """
-    INSERT INTO gesture(gesture_type) VALUES(?);
+add_humidity_to_db_sql = """
+    INSERT INTO humidity(value) VALUES(?);
 """
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to EC2 with result code " + str(rc))
-        client.subscribe(RESULTS)
+        client.subscribe(MQTT_HUMIDITY)
     else:
         print("Failed to connect. Error code %d." % rc)
 
@@ -32,12 +28,12 @@ def setup():
 
     print("Connecting...")
 
-    client.connect(HOST_ADDRESS)
+    client.connect("localhost")
     client.loop_forever()
 
-def write_to_db(gesture):
+def write_to_db(data):
     cur = conn.cursor()
-    cur.execute(add_gesture_to_db_sql, (gesture,))
+    cur.execute(add_humidity_to_db_sql, (data,))
     conn.commit()
 
 if __name__ == "__main__":
