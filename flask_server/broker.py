@@ -29,7 +29,7 @@ class MQTT_Broker:
     def on_publish(self, client, userdata, result):
         print("Published")
 
-    def __init__(self, USERNAME=None, PASSWORD=None, HOST_ADDRESS='localhost', SQL_INSTRUC='None', TOPIC=''):
+    def __init__(self, USERNAME=None, PASSWORD=None, HOST_ADDRESS='localhost', SQL_INSTRUC=None, TOPIC=None):
         self.client = mqtt.Client()
         self.client.username_pw_set(USERNAME, PASSWORD)
         self.client.on_connect = self.on_connect
