@@ -3,6 +3,7 @@ PASSWORD = "aegis2021"
 MQTT_GESTURE_RESULTS = "aegis/gesture_results"
 MQTT_GESTURE_CLASSIFIER = "aegis/gesture"
 MQTT_HUMIDITY = "aegis/humidity"
+MQTT_INTENSITY = "aegis/intensity"
 
 HOST_ADDRESS = "172.31.13.103"
 MQTT_PORT = 1883
