@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, SafeAreaView, Button, TextInput } from 'react-native';
+import { StyleSheet, Text, View, Image, SafeAreaView, Button, TextInput, ToastAndroid } from 'react-native';
 
 const getAppStatus = async () => {
   let response = await fetch(
@@ -46,9 +46,15 @@ export default function App() {
     if(current === "status" && newGesture === "Swipe")
       setCurrentScreen("camera");
     else if(current === "camera" && newGesture === "Swipe")
-      setCurrentScreen("status")
-    else if(newGesture === "Water plant" && humidityLevel === "Low")
-      setCurrentScreen("water")
+      setCurrentScreen("status");
+    else if(newGesture === "Water plant") {
+      if(humidityLevel === "Low") {
+        setCurrentScreen("water");
+      } else {
+        showToast();
+      }
+    }
+      
   }
 
   const setHumidity = () => {
@@ -71,6 +77,10 @@ export default function App() {
     }
     
     sendHumidityToServer();
+  }
+
+  const showToast = () => {
+    ToastAndroid.show("Soil not dry, you can't water the plant", ToastAndroid.SHORT);
   }
 
 
