@@ -8,7 +8,6 @@ import sys
 sys.path.append("/home/ubuntu/iot/")
 sys.path.append("/home/ubuntu/iot/flask_server/")
 from settings import HOST_ADDRESS, DB_DIR, IMAGE_NAME, CONFIG_DIR, USERNAME, PASSWORD
-from broker import MQTT_Broker
 
 conn = sqlite3.connect(DB_DIR, check_same_thread=False)
 
@@ -27,8 +26,6 @@ SELECT * FROM intensity ORDER BY id DESC LIMIT 1;
 
 app = Flask(__name__)
 api = Api(app)
-record_gesture_broker = MQTT_Broker(USERNAME, PASSWORD, HOST_ADDRESS)
-record_gesture_broker.run()
 
 def read_config():
     with open(CONFIG_DIR, "r") as f:
@@ -96,9 +93,6 @@ class Action(Resource):
             config["high_threshold"] = high_humidity
 
             save_config(config)
-        
-        elif action == 'record_gesture':
-            record_gesture_broker.publish("aegis/start_gesture", "Trigger gesture record")
 
 
 api.add_resource(Gesture, '/app')
