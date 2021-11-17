@@ -1,3 +1,6 @@
+import sys
+sys.path.append("/home/ubuntu/iot/")
+
 import paho.mqtt.client as mqtt
 import numpy as np
 import json

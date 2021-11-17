@@ -7,6 +7,7 @@ import json
 import sys
 from flask_server.broker import MQTT_Broker
 sys.path.append("/home/ubuntu/iot/")
+sys.path.append("/home/ubuntu/iot/flask_server")
 from settings import HOST_ADDRESS, DB_DIR, IMAGE_NAME, CONFIG_DIR, USERNAME, PASSWORD
 from broker import MQTT_Broker
 
