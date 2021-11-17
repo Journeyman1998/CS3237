@@ -27,14 +27,13 @@ class MQTT_Broker:
     def on_publish(self, client, userdata, result):
         print("Published")
 
-    def __init__(self, USERNAME=None, PASSWORD=None, HOST_ADDRESS='localhost', SQL_INSTRUC='None', TOPIC='', PUBLISH_MSG=None):
+    def __init__(self, USERNAME=None, PASSWORD=None, HOST_ADDRESS='localhost', SQL_INSTRUC='None', TOPIC=''):
         self.client = mqtt.Client()
         self.client.username_pw_set(USERNAME, PASSWORD)
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.on_publish = self.on_publish
         self.topic = TOPIC
-        self.publish_message = PUBLISH_MSG
 
         self.conn = sqlite3.connect(DB_DIR, check_same_thread=False)
         self.sql_command = SQL_INSTRUC
@@ -42,7 +41,7 @@ class MQTT_Broker:
         self.client.connect(HOST_ADDRESS)
 
     def run(self):
-        self.client.loop_start() #or loop_forever() ?
+        self.client.loop_forever() #or loop_forever() ?
 
-    def publish(self):
-        self.client.publish(self.topic, self.publish_message)
+    def publish(self, topic, message):
+        self.client.publish(topic, message)

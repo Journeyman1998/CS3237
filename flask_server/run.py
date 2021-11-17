@@ -5,9 +5,8 @@ import sqlite3
 import json
 
 import sys
-from flask_server.broker import MQTT_Broker
 sys.path.append("/home/ubuntu/iot/")
-sys.path.append("/home/ubuntu/iot/flask_server")
+sys.path.append("/home/ubuntu/iot/flask_server/")
 from settings import HOST_ADDRESS, DB_DIR, IMAGE_NAME, CONFIG_DIR, USERNAME, PASSWORD
 from broker import MQTT_Broker
 
@@ -28,7 +27,7 @@ SELECT * FROM intensity ORDER BY id DESC LIMIT 1;
 
 app = Flask(__name__)
 api = Api(app)
-record_gesture_broker = MQTT_Broker(USERNAME, PASSWORD, HOST_ADDRESS, None, TOPIC="aegis/start_gesture", PUBLISH_MSG="Trigger gesture record")
+record_gesture_broker = MQTT_Broker(USERNAME, PASSWORD, HOST_ADDRESS)
 record_gesture_broker.run()
 
 def read_config():
@@ -99,7 +98,7 @@ class Action(Resource):
             save_config(config)
         
         elif action == 'record_gesture':
-            record_gesture_broker.publish()
+            record_gesture_broker.publish("aegis/start_gesture", "Trigger gesture record")
 
 
 api.add_resource(Gesture, '/app')
