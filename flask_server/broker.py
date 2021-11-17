@@ -42,7 +42,7 @@ class MQTT_Broker:
         self.client.connect(HOST_ADDRESS)
 
     def run(self):
-        self.client.start_loop() #or loop_forever() ?
+        self.client.loop_start() #or loop_forever() ?
 
     def publish(self):
         self.client.publish(self.topic, self.publish_message)
