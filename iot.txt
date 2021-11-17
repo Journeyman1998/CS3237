@@ -1,0 +1,8 @@
+ec2:
+ssh -i "iot.pem" ubuntu@18.142.17.12
+public: 18.142.17.12
+
+
+mqtt
+username: aegis
+pw: aegis2021
