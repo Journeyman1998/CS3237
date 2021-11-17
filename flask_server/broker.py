@@ -15,7 +15,9 @@ class MQTT_Broker:
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             print("Connected to EC2 with result code " + str(rc))
-            client.subscribe(self.topic)
+
+            if self.topic != None:
+                client.subscribe(self.topic)
         else:
             print("Failed to connect. Error code %d." % rc)
 
