@@ -4,7 +4,11 @@ import werkzeug
 import sqlite3
 import json
 
-from settings import HOST_ADDRESS, DB_DIR, IMAGE_NAME, CONFIG_DIR
+import sys
+from flask_server.broker import MQTT_Broker
+sys.path.append("/home/ubuntu/iot/")
+from settings import HOST_ADDRESS, DB_DIR, IMAGE_NAME, CONFIG_DIR, USERNAME, PASSWORD
+from broker import MQTT_Broker
 
 conn = sqlite3.connect(DB_DIR, check_same_thread=False)
 
@@ -16,8 +20,15 @@ get_latest_humidity_sql = """
 SELECT * FROM humidity ORDER BY id DESC LIMIT 1;
 """
 
+get_latest_intensity_sql = """
+SELECT * FROM intensity ORDER BY id DESC LIMIT 1;
+"""
+
+
 app = Flask(__name__)
 api = Api(app)
+record_gesture_broker = MQTT_Broker(USERNAME, PASSWORD, HOST_ADDRESS, None, "aegis/start_gesture", "Trigger gesture record")
+record_gesture_broker.run()
 
 def read_config():
     with open(CONFIG_DIR, "r") as f:
@@ -27,7 +38,7 @@ def read_config():
 def save_config(config):
     with open(CONFIG_DIR, "w") as f:
         json.dump(config, f)
-
+    print("Saved")
 
 class Gesture(Resource):
     def get(self):
@@ -43,7 +54,11 @@ class Gesture(Resource):
         # get config
         config = read_config()
 
-        results = {"id": row[0], "gesture": row[1], "humidity": humidity, "config": config}
+        cur = conn.cursor()
+        intensity = conn.execute(get_latest_intensity_sql).fetchone()[1]
+
+        results = {"id": row[0], "gesture": row[1], "humidity": humidity, "intensity": intensity, "config": config}
+        print(results)
         return results
 
 
@@ -59,25 +74,37 @@ class UploadImage(Resource):
         image_file = args['file']
         image_file.save(IMAGE_NAME)
 
-class UpdateHumidity(Resource):
+class Action(Resource):
     def post(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('low_humidity', type=int)
-        parse.add_argument('high_humidity', type=int)
+        parse.add_argument('action', type=str)
+        parse.add_argument('payload', type=dict)
         args = parse.parse_args()
-        low_humidity = args['low_humidity']
-        high_humidity = args['high_humidity']
 
-        config = read_config()
-        config["low_threshold"] = low_humidity
-        config["high_threshold"] = high_humidity
-        save_config(config)
+        action = args['action']
 
+        if action == 'update_threshold':
+            threshold_parser = reqparse.RequestParser()
+            threshold_parser.add_argument('low', type=int, location=('payload',))
+            threshold_parser.add_argument('high', type=int, location=('payload',))
+
+            low_humidity = args['low']
+            high_humidity = args['high']
+
+            config = read_config()
+            config["low_threshold"] = low_humidity
+            config["high_threshold"] = high_humidity
+
+            save_config(config)
+        
+        elif action == 'record_gesture':
+            record_gesture_broker.publish()
+            
 
 api.add_resource(Gesture, '/app')
 api.add_resource(Image, '/image')
 api.add_resource(UploadImage, '/upload')
-api.add_resource(UpdateHumidity, '/config')
+api.add_resource(Action, '/action')
 
 if __name__ == "__main__":
     app.run(host=HOST_ADDRESS)
