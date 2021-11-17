@@ -21,7 +21,6 @@ NAME = "TNG"
 DURATION = 20
 ADDRESS = "54:6C:0E:B7:82:82"
 TOPIC = "aegis/gesture"
-GESTURE_TRIGGER_TOPIC = "aegis/start_gesture"
 
 GESTURE_DELAY = 1
 
@@ -160,12 +159,9 @@ def unpack(data):
     return acc_data + gyro_data
 
 
-def set_gesture(start):
-    start[0] = True
-
 async def run(address):
-
-    start = [False]
+    
+    mqtt_server = setup()
     
     async with BleakClient(address) as client:
         x = await client.is_connected()
@@ -176,33 +172,36 @@ async def run(address):
         gyro_sensor = GyroscopeSensorMovementSensorMPU9250()
 
 
-        sensor = MovementSensorMPU9250()
-        sensor.register(acc_sensor)
-        sensor.register(gyro_sensor)
-        mqtt_server = setup()
-        setup(sub_topic=GESTURE_TRIGGER_TOPIC, sub_callback=set_gesture, sub_callback_args=(start,))
-        
-        await sensor.start_listener(client)
+        movement_sensor = MovementSensorMPU9250()
+        movement_sensor.register(acc_sensor)
+        movement_sensor.register(gyro_sensor)
+
+        await movement_sensor.start_listener(client)
+        print("Get ready...")
 
         while True:
-            if not start[0]:
-                await asyncio.sleep(0.5)
-                continue
-            
+            await asyncio.sleep(GESTURE_DELAY)
             print("Start!!!")
 
             list_of_data = []
-
+    
             for i in range(DURATION):
                 await asyncio.sleep(0.05)  # slightly less than 100ms to accommodate time to print results
-                data = await sensor.read(client)
+                data = await movement_sensor.read(client)
                 data_to_add = unpack(data)
                 data_to_add = data_to_add[0:6]
                 list_of_data.append(data_to_add)
 
             print("Recording ended")
-            send_data(mqtt_server, list_of_data, TOPIC)
 
+            send_data(mqtt_server, list_of_data, TOPIC)
+            
+            userinput = await ainput("Continue? (Enter to input gesture, any to exit)")
+            if userinput != "":
+                exit(0)
+            else:
+                print(f"Get ready for next gesture...\n")
+    
     
 if __name__ == "__main__":
     """
@@ -219,4 +218,3 @@ if __name__ == "__main__":
    
     loop = asyncio.get_event_loop()
     loop.run_until_complete(run(address))
-

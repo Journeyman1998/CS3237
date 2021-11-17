@@ -90,21 +90,6 @@ export default function App() {
     return "Success";
   }
 
-  const startGestureRecord = () => {
-    var body = new FormData();
-    body.append('action', 'record_gesture');
-    body.append('payload', {});
-
-    fetch('http://18.142.17.12:5000/action',
-      {
-        method: 'POST',
-        body
-      }
-    );
-
-    return "Success";
-  }
-
   // only change back from water plant screen when humidity is normal
   useEffect(() => {
     if(humidityLevel === "High" && currentScreen === "water") {
@@ -200,8 +185,7 @@ export default function App() {
     humidityLevel={humidityLevel} 
     lowHumidityThreshold={lowThreshold} 
     highHumidityThreshold={highThreshold} 
-    setHumidityThresholds={setThresholds} 
-    startGestureRecording={startGestureRecord}/>
+    setHumidityThresholds={setThresholds}/>
   }
   else if(currentScreen === "camera") {
     return <CameraScreen image={image}/>
@@ -222,7 +206,7 @@ function WaterScreen(props) {
   );
 }
 
-function CameraScreen({image}) {
+function CameraScreen({image, startGestureRecording}) {
 
   return (
     <View style={styles.container}>
@@ -234,7 +218,7 @@ function CameraScreen({image}) {
   );
 }
 
-function StatusScreen({humidityLevel, lowHumidityThreshold, highHumidityThreshold, setHumidityThresholds, startGestureRecording}) {
+function StatusScreen({humidityLevel, lowHumidityThreshold, highHumidityThreshold, setHumidityThresholds}) {
   
   const [lowText, setLow] = useState(lowHumidityThreshold.toString());
   const [highText, setHigh] = useState(highHumidityThreshold.toString());
@@ -277,8 +261,6 @@ function StatusScreen({humidityLevel, lowHumidityThreshold, highHumidityThreshol
         keyboardType="numeric"
       />
       <Button onPress={() => setHumidityThresholds(lowText, highText)} title="Set Threshold" />
-      <Text></Text>
-      <Button onPress={() => startGestureRecording()} title="Start Gesture" />
       <StatusBar style="auto" />
     </SafeAreaView>
     </View>
