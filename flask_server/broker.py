@@ -5,26 +5,33 @@ import sqlite3
 sys.path.append("/home/ubuntu/iot/")
 from settings import DB_DIR
 
-class MQTT_Broker:
 
-    def write_to_db(self, cmd, payload):
-        self.conn.execute(cmd, (payload,))
-        self.conn.commit()
+def write_to_db(conn, cmd, payload):
+    conn.execute(cmd, (payload,))
+    conn.commit()
 
-    def on_connect(self, client, userdata, flags, rc):
+def get_connect(topic):
+    def on_connect(client, userdata, flags, rc):
         if rc == 0:
             print("Connected to EC2 with result code " + str(rc))
 
-            if self.topic != None:
-                client.subscribe(self.topic)
-                print(f"Subscribed to {self.topic}\n")
+            if topic != None:
+                client.subscribe(topic)
+                print(f"Subscribed to {topic}\n")
         else:
             print("Failed to connect. Error code %d." % rc)
+    
+    return on_connect
 
-    def on_message(self, client, data, msg):
+def get_message(conn, sql_command):
+    def on_message(client, data, msg):
         payload = str(msg.payload, 'utf-8')
         print(f"Message Received: {payload}")
-        self.write_to_db(self.sql_command, payload)
+        write_to_db(conn, sql_command, payload)
+    
+    return on_message
+
+class MQTT_Broker:
 
     def on_publish(self, client, userdata, result):
         print("Published")
@@ -32,18 +39,16 @@ class MQTT_Broker:
     def __init__(self, USERNAME=None, PASSWORD=None, HOST_ADDRESS='localhost', SQL_INSTRUC=None, TOPIC=None):
         self.client = mqtt.Client()
         self.client.username_pw_set(USERNAME, PASSWORD)
-        self.topic = TOPIC
-        self.client.on_connect = self.on_connect
-        self.client.on_message = self.on_message
-        self.client.on_publish = self.on_publish
-
         self.conn = sqlite3.connect(DB_DIR, check_same_thread=False)
-        self.sql_command = SQL_INSTRUC
+
+        self.client.on_connect = get_connect(TOPIC)
+        self.client.on_message = self.on_message(self.conn, SQL_INSTRUC)
+        self.client.on_publish = self.on_publish
 
         self.client.connect(HOST_ADDRESS)
 
     def run(self):
-        self.client.loop_start() #or loop_forever() ?
+        self.client.loop_forever() #or loop_forever() ?
 
     def publish(self, topic, message):
         self.client.publish(topic, message)
