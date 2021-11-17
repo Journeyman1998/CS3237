@@ -8,8 +8,7 @@ from settings import DB_DIR
 class MQTT_Broker:
 
     def write_to_db(self, cmd, payload):
-        cur = self.conn.cursor()
-        cur.execute(cmd, (payload,))
+        self.conn.execute(cmd, (payload,))
         self.conn.commit()
 
     def on_connect(self, client, userdata, flags, rc):
@@ -18,6 +17,7 @@ class MQTT_Broker:
 
             if self.topic != None:
                 client.subscribe(self.topic)
+                print(f"Subscribed to {self.topic}\n")
         else:
             print("Failed to connect. Error code %d." % rc)
 
@@ -32,10 +32,10 @@ class MQTT_Broker:
     def __init__(self, USERNAME=None, PASSWORD=None, HOST_ADDRESS='localhost', SQL_INSTRUC=None, TOPIC=None):
         self.client = mqtt.Client()
         self.client.username_pw_set(USERNAME, PASSWORD)
+        self.topic = TOPIC
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.on_publish = self.on_publish
-        self.topic = TOPIC
 
         self.conn = sqlite3.connect(DB_DIR, check_same_thread=False)
         self.sql_command = SQL_INSTRUC
