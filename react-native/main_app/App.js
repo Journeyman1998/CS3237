@@ -77,10 +77,25 @@ export default function App() {
   const sendHumidityToServer = async () => {
 
     var body = new FormData();
-    body.append('low_humidity', lowThreshold);
-    body.append('high_humidity', highThreshold);
+    body.append('action', "update_threshold");
+    body.append('payload', {'low': lowThreshold, 'high': highThreshold});
 
-    fetch('http://18.142.17.12:5000/config',
+    fetch('http://18.142.17.12:5000/action',
+      {
+        method: 'POST',
+        body
+      }
+    );
+
+    return "Success";
+  }
+
+  const startGestureRecord = () => {
+    var body = new FormData();
+    body.append('action', 'record_gesture');
+    body.append('payload', {});
+
+    fetch('http://18.142.17.12:5000/action',
       {
         method: 'POST',
         body
@@ -92,7 +107,7 @@ export default function App() {
 
   // only change back from water plant screen when humidity is normal
   useEffect(() => {
-    if(humidityLevel !== "Low" && currentScreen === "water") {
+    if(humidityLevel === "High" && currentScreen === "water") {
       setCurrentScreen("status");
     }
   }, [humidityLevel, currentScreen])
@@ -181,7 +196,12 @@ export default function App() {
 
 
   if(currentScreen === "status") {
-    return <StatusScreen humidityLevel={humidityLevel} lowHumidityThreshold={lowThreshold} highHumidityThreshold={highThreshold} setHumidityThresholds={setThresholds} />
+    return <StatusScreen 
+    humidityLevel={humidityLevel} 
+    lowHumidityThreshold={lowThreshold} 
+    highHumidityThreshold={highThreshold} 
+    setHumidityThresholds={setThresholds} 
+    startGestureRecording={startGestureRecord}/>
   }
   else if(currentScreen === "camera") {
     return <CameraScreen image={image}/>
@@ -196,7 +216,7 @@ function WaterScreen(props) {
 
   return (
     <View style={styles.container}>
-      <Text>Watering Plant</Text>
+      <Text style={{color:'#000000', fontSize:40}}>Watering Plant...</Text>
       <StatusBar style="auto" />
     </View>
   );
@@ -206,25 +226,26 @@ function CameraScreen({image}) {
 
   return (
     <View style={styles.container}>
-      <Text>Camera Screen</Text>
+      <Text style={{color:'#000000', fontSize:40}}>
+        Mr.Plant says HI :) </Text>
       <Image source={{uri: image, scale: 1}} style={{width: 500, height: 500}}/>
       <StatusBar style="auto" />
     </View>
   );
 }
 
-function StatusScreen({humidityLevel, lowHumidityThreshold, highHumidityThreshold, setHumidityThresholds}) {
+function StatusScreen({humidityLevel, lowHumidityThreshold, highHumidityThreshold, setHumidityThresholds, startGestureRecording}) {
   
   const [lowText, setLow] = useState(lowHumidityThreshold.toString());
   const [highText, setHigh] = useState(highHumidityThreshold.toString());
 
   const HumidityReadingLabel = () => {
     if (humidityLevel === "Low"){
-      return <Text style={styles.humidityLow}>Low</Text>
+      return <Text style={styles.humidityLow}>               LOW</Text>
     } else if (humidityLevel === "Med") {
-      return <Text style={styles.humidityMed}>Medium</Text>
+      return <Text style={styles.humidityMed}>           MEDIUM</Text>
     } else if (humidityLevel === "High") {
-      return <Text style={styles.humidityHigh}>High</Text>
+      return <Text style={styles.humidityHigh}>              HIGH</Text>
     }
   }
 
@@ -232,12 +253,13 @@ function StatusScreen({humidityLevel, lowHumidityThreshold, highHumidityThreshol
   return (
     <View style={styles.container}>
       <SafeAreaView>
-      <Text>Status Screen</Text>
-      <Text>Humidity: </Text>
+      <Text style={{color:'#000000', fontSize:40}}>
+        Status Screen</Text>
+      <Text style={{color:'#000000', fontSize:40}}>
+        Humidity:</Text>
       <HumidityReadingLabel />
-      <Text></Text>
-      <Text></Text>
-      <Text> Warning: </Text>
+      <Text style={{color:'#000000', fontSize:40}}> 
+        Warning:</Text>
       <TextInput
         style={styles.input}
         onChangeText={setLow}
@@ -245,8 +267,8 @@ function StatusScreen({humidityLevel, lowHumidityThreshold, highHumidityThreshol
         placeholder="Set threshold for humidity warning"
         keyboardType="numeric"
       />
-
-      <Text> Accepted: </Text>
+      <Text style={{color:'#000000', fontSize:40}}>
+        Accepted:</Text>
       <TextInput
         style={styles.input}
         onChangeText={setHigh}
@@ -254,34 +276,40 @@ function StatusScreen({humidityLevel, lowHumidityThreshold, highHumidityThreshol
         placeholder="Set threshold for accepted humidity"
         keyboardType="numeric"
       />
-      <Button onPress={() => setHumidityThresholds(lowText, highText)} title="Set Thresholds" />
-
+      <Button onPress={() => setHumidityThresholds(lowText, highText)} title="Set Threshold" />
+      <Text></Text>
+      <Button onPress={() => startGestureRecording()} title="Start Gesture" />
       <StatusBar style="auto" />
     </SafeAreaView>
     </View>
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#C6E2E9',
     alignItems: 'center',
     justifyContent: 'center',
   },
   humidityLow: {
     backgroundColor: 'red',
+    fontSize:40,
   },
   humidityMed: {
     backgroundColor: 'orange',
+    fontSize:40,
   },
   humidityHigh: {
     backgroundColor: 'green',
+    fontSize:40,
   },
   input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
+    height: 70,
+    margin: 20,
+    borderWidth: 3,
+    padding: 20,
+    fontSize: 25,
   },
 });
