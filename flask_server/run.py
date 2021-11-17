@@ -27,7 +27,7 @@ SELECT * FROM intensity ORDER BY id DESC LIMIT 1;
 
 app = Flask(__name__)
 api = Api(app)
-record_gesture_broker = MQTT_Broker(USERNAME, PASSWORD, HOST_ADDRESS, None, "aegis/start_gesture", "Trigger gesture record")
+record_gesture_broker = MQTT_Broker(USERNAME, PASSWORD, HOST_ADDRESS, None, TOPIC="aegis/start_gesture", PUBLISH_MSG="Trigger gesture record")
 record_gesture_broker.run()
 
 def read_config():
@@ -99,7 +99,7 @@ class Action(Resource):
         
         elif action == 'record_gesture':
             record_gesture_broker.publish()
-            
+
 
 api.add_resource(Gesture, '/app')
 api.add_resource(Image, '/image')
