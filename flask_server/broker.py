@@ -42,13 +42,13 @@ class MQTT_Broker:
         self.conn = sqlite3.connect(DB_DIR, check_same_thread=False)
 
         self.client.on_connect = get_connect(TOPIC)
-        self.client.on_message = self.on_message(self.conn, SQL_INSTRUC)
+        self.client.on_message = get_message(self.conn, SQL_INSTRUC)
         self.client.on_publish = self.on_publish
 
         self.client.connect(HOST_ADDRESS)
 
     def run(self):
-        self.client.loop_forever() #or loop_forever() ?
+        self.client.loop_start() #or loop_forever() ?
 
     def publish(self, topic, message):
         self.client.publish(topic, message)
